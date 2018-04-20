@@ -1,144 +1,54 @@
-/* Name: main.c
- * Author: <Steen Grøntved>
- * Copyright: <insert your copyright message here>
- * License: <insert your license reference here>
- */
-
 #include <avr/io.h>
 #include <util/delay.h>
+#include <avr/interrupt.h>
+#include "check_rot.h"
 
-int op_ned;
-int gem;
-int state1;
-int state2;
+void timer0_init()
+{
+    // set up timer with prescaler = 1024
+    TCCR0 |= (1 << CS02)|(1 << CS00);
 
-int value = 100;
+    // initialize counter
+    TCNT0 = 0;
 
-void initialize(){ //prototype
-DDRC=0x00;
-DDRB=0xFF;
-DDRD=0xFF;
+    TIMSK |= (1<<TOIE0); // overflow enable
 
+    sei();
+}
+
+ISR(TIMER0_OVF_vect)//overflow interrupt funktion:
+{
+  TCNT0 = 0;
+  overflow++;
+}
+
+void oflow()
+{
+  diff = abs(h1_value);
+  h1_value = 0;
+  overflow = 0;
+}
+
+void initialize(){
+DDRC=0b00000000;
+DDRB=0b00111001;
+DDRD=0b11111111;
+timer0_init();
 }
 
 int main(void)
 {
 	initialize();
-	PORTD=0b11111111;
-
-while (1){
-
-
-/*
-if ((PINC & 1<<PC4) && !(PINC & 1<<PC5)) {
-	PORTB = 0b00000010;
-}
-	if (!(PINC & 1<<PC4) && (PINC & 1<<PC5)) {
-		PORTB = 0b00000100;
-}
-	if (!(PINC & 1<<PC4) && !(PINC & 1<<PC5)){
-		PORTB = 0b00000000;
-	}*//*
-
-else if (((PINC & 0<<PC4) && (PINC & 1<<PC5))){
-	PORTB = 0b00000010;
-}
-else if (((PINC & 0<<PC4) && (PINC & 0<<PC5))){
-	PORTB = 0b00000000;
-}
-else if (((PINC & 1<<PC4) && (PINC & 0<<PC5))){
-	PORTB = 0b00000100;
-}*/
-
-
-
-/*
-	if ((PINC & 1<<PC4) && (PINC & 1<<PC5)){
-		if (op_ned == 1){
-			value ++;
-			op_ned = 0;
-			gem = 0;
-		}
-		 if (op_ned == 2){
-			value--;
-			op_ned = 0;
-			gem = 0;
-		}
-	}
-	if (gem == 0){
-		if (!(PINC & 1<<PC4) && (PINC & 1<<PC5)){
-			op_ned = 1;
-			gem = 1;
-		}
-		 if ((PINC & 1<<PC4) && !(PINC & 1<<PC5)){
-		op_ned = 2;
-		gem = 1;
-	}
-}*/
-
-
-	if (!(PINC & 1<<PC4) && !(PINC & 1<<PC5)){
-		state1 = 1;
-	}
-	else if ((PINC & 1<<PC4) && !(PINC & 1<<PC5)) {
-		state1 = 2;
-	}
-	else if ((PINC & 1<<PC4) && (PINC & 1<<PC5)) {
-		state1 = 3;
-	}
-	else if (!(PINC & 1<<PC4) && (PINC & 1<<PC5)){
-		state1 = 4;
-	}
-
-while (1){
-	if (!(PINC & 1<<PC4) && !(PINC & 1<<PC5)){
-		state2 = 1;
-	}
-	else if ((PINC & 1<<PC4) && !(PINC & 1<<PC5)) {
-		state2 = 2;
-	}
-	else if ((PINC & 1<<PC4) && (PINC & 1<<PC5)) {
-		state2 = 3;
-	}
-	else if (!(PINC & 1<<PC4) && (PINC & 1<<PC5)){
-		state2 = 4;
-	}
-/*
-	if (state1 == 1 && state2 == 2){
-		value++;
-	} */
-	if (state1 == 1 && state2 == 4){
-		value --;
-	} /*
-	else if (state1 == 2 && state2 == 3){
-		value++;
-	}
-	else if (state1 == 2 && state2 == 1){
-		value--;
-	}
-	else if (state1 == 3 && state2 == 4){
-		value++;
-	}
-	else if (state1 == 3 && state2 == 2){
-		value--;
-	} */
-	else if (state1 == 4 && state2 == 1){
-		value++;
-	} /*
-	else if (state1 == 4 && state2 == 3){
-		value--;
-	}*/
-
-	state1 = state2;
-
-
- if (value > 100){
-	 PORTB = 0b00000110;
-	 	PORTD=0b11111111;
- } else{
-	 PORTB = 0b00000000;
-	 PORTD = 0b00000000;
- }
-}
-}
+	p1_value = 10;
+  while (1){
+    rot1(0);
+    rot1(1);
+    rot2(0);
+    rot2(1);
+    if(overflow >= 1)
+    {
+      oflow();
+    }
+    PORTD = diff;
+  }
 }
