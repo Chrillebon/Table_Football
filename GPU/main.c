@@ -115,10 +115,10 @@ int main(void)
 
 	while(1)
 	{
-		PORTD = 0xFF;
-		PORTB = 0xFF;
-		PORTC = 0xFF;
-		PORTA = 0xFF;
+		PORTD = 0b11111111;
+		//PORTB = 0xFF;
+		//PORTC = 0xFF;
+		//PORTA = 0xFF;
 	}
 	return 0;
 }

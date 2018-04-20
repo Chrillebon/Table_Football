@@ -19,14 +19,34 @@ volatile int this = 0;
 volatile int globsize = 0;
 //volatile int write = 48;
 volatile int val = 0;
+int p1speed = 0;
+int p1place = 0;
+int p2speed = 0;
+int p2place = 0;
+int p1speedold = 0;
+int p1placeold = 0;
+int p2speedold = 0;
+int p2placeold = 0;
+int tal;
+
 
 
 void initialize(){
 	DDRC = 0xFF;
 	DDRD = 0xFF;
 	DDRA = 0x00;
+	DDRB = 0x00;
+	sei();
 }
 
+void timer0_init()
+{
+    // set up timer with prescaler = 1024
+    TCCR0 |= (1 << CS02)|(1 << CS00);
+
+    // initialize counter
+    TCNT0 = 0;
+}
 
 
 void rensinput() // renser input, så vi kan bruge det
@@ -149,11 +169,48 @@ int size(char Input[])
 	return 0;
 }
 
+int givemevalues(int t){
+	if(t == 00){
+		PORTD |= 0b00000000;
+		for(int i=0;i<1000;i++){}
+
+	}
+
+	else if(t == 01){
+		PORTD |= 0b00000001;
+		for(int i=0;i<1000;i++){}
+	}
+
+	else if(t == 10){
+		PORTD |= 0b00000010;
+		for(int i=0;i<1000;i++){}
+	}
+
+	else if(t == 11){
+		PORTD |= 0b00000011;
+		for(int i=0;i<1000;i++){}
+	}
+	return read();
+}
+
+
+
 
 int main(void)
 {
 
 	initialize();
+	timer0_init();
+	int value = 0;
+	/*p1speedold = p1speed;
+	p1speed = givemevalues(10);
+	p1placeold = p1place;
+	p1place = givemevalues(01);
+	p2speedold = p2speed;
+	p2speed = givemevalues(11);
+	p2placeold = p2place;
+	p2place = givemevalues(00);*/
+
 
 	while(1){
 
@@ -173,8 +230,50 @@ int main(void)
 		}
 
 		//val += 1;
-		int value = read();//PORTA||PINA;
+		/*	p1speedold = p1speed;
+		p1speed = givemevalues(10);
+		p1placeold = p1place;
+		p1place = givemevalues(01);
+		p2speedold = p2speed;
+		p2speed = givemevalues(11);
+		p2placeold = p2place;
+		p2place = givemevalues(00);*/
 
+
+		/*if (p1speed != p1speedold){
+			tal = 10;
+		}
+		if (p2speed != p2speedold){
+			tal = 11;
+		}
+		if (p1place != p1placeold){
+			tal = 01;
+		}
+		if (p2place != p2placeold){
+			tal = 00;
+		}*/
+
+	/*	tal = 11;//01//10//11
+		if (p2speed != p2speedold){
+			tal = 10;
+		}*//*else{
+			tal = 11;
+		}*/
+		/*if (givemevalues(1)!=p1place){
+			tal = 1;
+		}
+		if (givemevalues(10)!=p1speed){
+			tal = 10;
+		}
+		if (givemevalues(11)!=p2speed){
+			tal = 11;
+		}
+		if (givemevalues(0)!=p2place){
+			tal = 0;
+		}*/
+
+		tal = 11;
+		value = givemevalues(tal);
 		if (val >= 10000){
 			val = 0;
 
@@ -183,7 +282,7 @@ int main(void)
 			val = 9999;
 
 		}
-
+		//char v = "1";
 
 		char SoonSoonToBe[5];   //Display Values!!
 		sprintf(SoonSoonToBe, "%d", value);
