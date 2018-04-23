@@ -5,8 +5,8 @@
 
 void timer0_init()
 {
-    // set up timer with prescaler = 1024
-    TCCR0 |= (1 << CS02)|(1 << CS00);
+    // set up timer with prescaler = 256 /*1024*/
+    TCCR0 |= (1 << CS02)/*|(1 << CS00)*/;
 
     // initialize counter
     TCNT0 = 0;
@@ -24,31 +24,90 @@ ISR(TIMER0_OVF_vect)//overflow interrupt funktion:
 
 void oflow()
 {
-  diff = abs(h1_value);
-  h1_value = 0;
+  //127 så den kan dreje begge veje
+  diff1 = abs(h1_value);
+  diff2 = abs(h2_value);
+  h1_value = 127;
+  h2_value = 127;
   overflow = 0;
 }
 
 void initialize(){
 DDRC=0b00000000;
-DDRB=0b00111001;
+DDRB=0b00111111;
 DDRD=0b11111111;
 timer0_init();
+}
+
+void memset(int arr[2][4])
+{
+  int i,o;
+  for(i=0;i<2;i++)
+  {
+    for(o=0;o<4;o++)
+    {
+      arr[i][o] = 0;
+    }
+  }
+}
+
+void send()
+{
+  //B6 og B7 er status
+  //PORTD er værdier
+  if(sendstat < 5) //pos1
+  {
+    PORTD = 0; //Skal ikke sende fejlværdier
+    //status = 0,0
+    PORTB &= ~smart[6];
+    PORTB &= ~smart[7];
+    PORTD = p1_value;
+  }
+  else if(sendstat >=5 && sendstat < 10) //speed1
+  {
+    PORTD = 0; //Skal ikke sende fejlværdier
+    //status = 1,0
+    PORTB |= smart[6];
+    PORTB &= ~smart[7];
+    PORTD = diff1;
+  }
+  else if(sendstat >= 10 && sendstat < 15) //pos2
+  {
+    PORTD = 0; //Skal ikke sende fejlværdier
+    //status = 1,1
+    PORTB |= smart[6];
+    PORTB |= smart[7];
+    PORTD = p2_value;
+  }
+  else if(sendstat >= 15 && sendstat < 20) //speed2
+  {
+    PORTD = 0; //Skal ikke sende fejlværdier
+    //status = 0,1
+    PORTB &= ~smart[6];
+    PORTB |= smart[7];
+    PORTD = diff2;
+  }
+  sendstat++;
+  if(sendstat >= 20)//8) //reset
+  {
+    sendstat = 0;
+  }
 }
 
 int main(void)
 {
 	initialize();
+  memset(val);
 	p1_value = 10;
   while (1){
-    rot1(0);
-    rot1(1);
-    rot2(0);
-    rot2(1);
-    if(overflow >= 1)
+    rot1();
+    speed1();
+    rot2();
+    speed2();
+    if(overflow >= 2)
     {
       oflow();
     }
-    PORTD = diff;
+    send();
   }
 }

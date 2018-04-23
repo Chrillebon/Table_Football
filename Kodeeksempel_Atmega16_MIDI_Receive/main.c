@@ -19,21 +19,17 @@ volatile int this = 0;
 volatile int globsize = 0;
 //volatile int write = 48;
 volatile int val = 0;
-int p1speed = 0;
-int p1place = 0;
-int p2speed = 0;
-int p2place = 0;
-int p1speedold = 0;
-int p1placeold = 0;
-int p2speedold = 0;
-int p2placeold = 0;
 int tal;
+int sendstat = 0;
+int laststat = 0;
+int newvalue;
+int handle[5] = {};
 
 
 
 void initialize(){
 	DDRC = 0xFF;
-	DDRD = 0xFF;
+	DDRD = 0b11111100;
 	DDRA = 0x00;
 	DDRB = 0x00;
 	sei();
@@ -132,12 +128,15 @@ void Light_It_Up(int i)
 	Global_Time++;
 }
 
-
-void Handles()
+void handles()
 {
-
-
-
+	int temp = read();
+	sendstat = status();
+	if(laststat == sendstat)
+	{
+		handle[sendstat] = temp;
+	}
+	laststat = sendstat;
 }
 
 int read()
@@ -193,7 +192,27 @@ int givemevalues(int t){
 	return read();
 }
 
-
+int status()
+{
+	int vala = (PIND & 1), valb = (PIND & 2);
+	if(!vala && !valb) //Status: 0,0
+	{
+		return 0;
+	}
+	else if(vala && !valb) //Status: 1,0
+	{
+		return 1;
+	}
+	else if(vala && valb) //Status: 1,1
+	{
+		return 2;
+	}
+	else if(!vala && valb) //Status: 0,1
+	{
+		return 3;
+	}
+	return 4; //Burde aldrig komme herned...
+}
 
 
 int main(void)
@@ -271,9 +290,6 @@ int main(void)
 		if (givemevalues(0)!=p2place){
 			tal = 0;
 		}*/
-
-		tal = 11;
-		value = givemevalues(tal);
 		if (val >= 10000){
 			val = 0;
 
@@ -283,18 +299,19 @@ int main(void)
 
 		}
 		//char v = "1";
+		handles();
 
 		char SoonSoonToBe[5];   //Display Values!!
-		sprintf(SoonSoonToBe, "%d", value);
+		sprintf(SoonSoonToBe, "%d", handle[0]);
 
 		SoonToBe = SoonSoonToBe;
 		globsize = size(SoonToBe);
-
 		rensinput();
 
 		display(t); //Gør klar til hvad der skal stå på display
 
 		Light_It_Up(this); //Tænder rent faktisk lyset i displays
+
 
 		if(Global_Time > 1.5*1000) //rykker bogstaver og tal på display efter tid
 		{

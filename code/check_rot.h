@@ -7,11 +7,13 @@ int p2_state2;*/
 int p1_value = 100;
 int p2_value = 100;
 
-int h1_value = 0;
-int h2_value = 0;
+int h1_value = 127;
+int h2_value = 127;
 
-int val[2][4]{};
+int val[2][4];
 
+int diff1 = 0;
+int diff2 = 0;
 /*
 Val:
 ID: 			0						1						 2							3
@@ -21,8 +23,7 @@ Name: p2_state1, p2_state2, p2speed_state1, p2speed_state2		1
 eks: p1_state2 == val[0][1]
 */
 
-
-int diff;
+int sendstat = 0;
 int overflow = 0;
 
 int smart[8] = {
@@ -156,35 +157,35 @@ void rot2()
 void speed2()
 {
   //Placerring encoder 1
-	if (!(PINC & smart[2]) && !(PINC & smart[3])){
+	if (!(PINB & smart[1]) && !(PINB & smart[2])){
 		val[1][3] = 1;
 	}
-	else if ((PINC & smart[2]) && !(PINC & smart[3])) {
+	else if ((PINB & smart[1]) && !(PINB & smart[2])) {
 		val[1][3] = 2;
 	}
-	else if ((PINC & smart[2]) && (PINC & smart[3])) {
+	else if ((PINB & smart[1]) && (PINB & smart[2])) {
 		val[1][3] = 3;
 	}
-	else if (!(PINC & smart[2]) && (PINC & smart[3])){
+	else if (!(PINB & smart[1]) && (PINB & smart[2])){
 		val[1][3] = 4;
 	}
 
 	//SPEED
 	if (val[1][2] == 1 && val[1][3] == 4) //Takker under bunden
 	{
-		h1_value--;
+		h2_value--;
 	}
 	else if (val[1][2] == 4 && val[1][3] == 1) //Takker over toppen
 	{
-		h1_value++;
+		h2_value++;
 	}
 	else if(val[1][2] > val[1][3]) //Drejer ned:
   {
-		h1_value--;
+		h2_value--;
   }
   else if (val[1][2] < val[1][3]) //Drejer op:
   {
-		h1_value++;
+		h2_value++;
   }
 
 	val[1][2] = val[1][3];
