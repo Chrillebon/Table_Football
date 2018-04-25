@@ -99,15 +99,20 @@ int main(void)
 	initialize();
   memset(val);
 	p1_value = 10;
+  int slowsend = 0;
   while (1){
     rot1();
     speed1();
     rot2();
     speed2();
-    if(overflow >= 2)
+    if(overflow >= 1)
     {
       oflow();
     }
-    send();
+    if(slowsend == 3)
+    {
+      send();
+    }
+    slowsend = (slowsend+1)%4;
   }
 }

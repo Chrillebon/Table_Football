@@ -23,13 +23,13 @@ int tal;
 int sendstat = 0;
 int laststat = 0;
 int newvalue;
-int handle[5] = {};
+int handle[5] = {99, 99, 99, 99, 99};
 
 
 
 void initialize(){
 	DDRC = 0xFF;
-	DDRD = 0b11111100;
+	DDRD = 0b11111010;
 	DDRA = 0x00;
 	DDRB = 0x00;
 	sei();
@@ -194,7 +194,7 @@ int givemevalues(int t){
 
 int status()
 {
-	int vala = (PIND & 1), valb = (PIND & 2);
+	int vala = (PIND & 1), valb = (PIND & 4);
 	if(!vala && !valb) //Status: 0,0
 	{
 		return 0;
@@ -240,13 +240,13 @@ int main(void)
 		}*/
 
 
-		if (PINA & 1<<PA0){
+		/*if (PINA & 1<<PA0){
 			val += 1;
 
 		} else {
 			val -= 1;
 
-		}
+		}*/
 
 		//val += 1;
 		/*	p1speedold = p1speed;
@@ -302,7 +302,7 @@ int main(void)
 		handles();
 
 		char SoonSoonToBe[5];   //Display Values!!
-		sprintf(SoonSoonToBe, "%d", handle[0]);
+		sprintf(SoonSoonToBe, "%d", handle[2]);
 
 		SoonToBe = SoonSoonToBe;
 		globsize = size(SoonToBe);
