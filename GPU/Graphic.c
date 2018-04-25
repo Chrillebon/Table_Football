@@ -28,23 +28,23 @@ ychange = 1;
 radiusError = 0;
 while(x >= y)
   {
-  GLCD_SetPixel(cx+x, cy+y, color-reverse);
-  GLCD_SetPixel(cx-x, cy+y, color-reverse);
-  GLCD_SetPixel(cx-x, cy-y, color-reverse);
-  GLCD_SetPixel(cx+x, cy-y, color-reverse);
-  GLCD_SetPixel(cx+y, cy+x, color-reverse);
-  GLCD_SetPixel(cx-y, cy+x, color-reverse);
-  GLCD_SetPixel(cx-y, cy-x, color-reverse);
-  GLCD_SetPixel(cx+y, cy-x, color-reverse);
-  y++;
-  radiusError += ychange;
-  ychange += 2;
-  if ( 2*radiusError + xchange > 0 )
+    GLCD_SetPixel(cx+x, cy+y, color-reverse);
+    GLCD_SetPixel(cx-x, cy+y, color-reverse);
+    GLCD_SetPixel(cx-x, cy-y, color-reverse);
+    GLCD_SetPixel(cx+x, cy-y, color-reverse);
+    GLCD_SetPixel(cx+y, cy+x, color-reverse);
+    GLCD_SetPixel(cx-y, cy+x, color-reverse);
+    GLCD_SetPixel(cx-y, cy-x, color-reverse);
+    GLCD_SetPixel(cx+y, cy-x, color-reverse);
+    y++;
+    radiusError += ychange;
+    ychange += 2;
+    if ( 2*radiusError + xchange > 0 )
     {
-    x--;
-	radiusError += xchange;
-	xchange += 2;
-	}
+      x--;
+    	radiusError += xchange;
+    	xchange += 2;
+  	}
   }
 }
 
