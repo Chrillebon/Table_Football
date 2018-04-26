@@ -29,7 +29,7 @@ int handle[5] = {99, 99, 99, 99, 99};
 
 void initialize(){
 	DDRC = 0xFF;
-	DDRD = 0b11111010;
+	DDRD = 0b11111000;
 	DDRA = 0x00;
 	DDRB = 0x00;
 	sei();
@@ -130,13 +130,16 @@ void Light_It_Up(int i)
 
 void handles()
 {
-	int temp = read();
-	sendstat = status();
-	if(laststat == sendstat)
+	if(!(PIND & 4))
 	{
-		handle[sendstat] = temp;
+		int temp = read();
+		sendstat = status();
+		handle[1] = sendstat;
 	}
-	laststat = sendstat;
+	/*if(laststat == sendstat)
+	{
+	}
+	laststat = sendstat;*/
 }
 
 int read()
@@ -194,7 +197,7 @@ int givemevalues(int t){
 
 int status()
 {
-	int vala = (PIND & 1), valb = (PIND & 4);
+	int vala = (PIND & 1), valb = (PIND & 2);
 	if(!vala && !valb) //Status: 0,0
 	{
 		return 0;
@@ -302,7 +305,7 @@ int main(void)
 		handles();
 
 		char SoonSoonToBe[5];   //Display Values!!
-		sprintf(SoonSoonToBe, "%d", handle[2]);
+		sprintf(SoonSoonToBe, "%d", handle[1]);
 
 		SoonToBe = SoonSoonToBe;
 		globsize = size(SoonToBe);

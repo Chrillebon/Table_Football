@@ -25,6 +25,7 @@ eks: p1_state2 == val[0][1]
 
 int sendstat = 0;
 int overflow = 0;
+int delayval = 0;
 
 int smart[8] = {
 	1, 2, 4, 8, 16, 32, 64, 128, 256

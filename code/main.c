@@ -20,6 +20,7 @@ ISR(TIMER0_OVF_vect)//overflow interrupt funktion:
 {
   TCNT0 = 0;
   overflow++;
+  delayval++;
 }
 
 void oflow()
@@ -34,7 +35,7 @@ void oflow()
 
 void initialize(){
 DDRC=0b00000000;
-DDRB=0b00111111;
+DDRB=0b00111110;
 DDRD=0b11111111;
 timer0_init();
 }
@@ -51,41 +52,63 @@ void memset(int arr[2][4])
   }
 }
 
+void delay()
+{
+  delayval = 0;
+  while(delayval < 1000)
+  {
+    //Vent
+  }
+  return;
+}
+
 void send()
 {
   //B6 og B7 er status
   //PORTD er værdier
   if(sendstat < 5) //pos1
   {
+    PORTB |= smart[0]; //Skal ikke modtage i anden ende (aktiv lav)
     PORTD = 0; //Skal ikke sende fejlværdier
     //status = 0,0
     PORTB &= ~smart[6];
     PORTB &= ~smart[7];
     PORTD = p1_value;
+    delay();
+    PORTB &= ~smart[0]; //Kan godt modtage fra nu af
   }
   else if(sendstat >=5 && sendstat < 10) //speed1
   {
+    PORTB |= smart[0]; //Skal ikke modtage i anden ende (aktiv lav)
     PORTD = 0; //Skal ikke sende fejlværdier
     //status = 1,0
     PORTB |= smart[6];
     PORTB &= ~smart[7];
     PORTD = diff1;
+    delay();
+    PORTB &= ~smart[0]; //Kan godt modtage fra nu af
   }
   else if(sendstat >= 10 && sendstat < 15) //pos2
   {
+    PORTB |= smart[0]; //Skal ikke modtage i anden ende (aktiv lav)
     PORTD = 0; //Skal ikke sende fejlværdier
     //status = 1,1
     PORTB |= smart[6];
     PORTB |= smart[7];
     PORTD = p2_value;
+    delay();
+    PORTB &= ~smart[0]; //Kan godt modtage fra nu af
   }
   else if(sendstat >= 15 && sendstat < 20) //speed2
   {
+    PORTB |= smart[0]; //Skal ikke modtage i anden ende (aktiv lav)
     PORTD = 0; //Skal ikke sende fejlværdier
     //status = 0,1
     PORTB &= ~smart[6];
     PORTB |= smart[7];
     PORTD = diff2;
+    delay();
+    PORTB &= ~smart[0]; //Kan godt modtage fra nu af
   }
   sendstat++;
   if(sendstat >= 20)//8) //reset
