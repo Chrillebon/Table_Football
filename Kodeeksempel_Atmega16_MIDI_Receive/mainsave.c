@@ -19,9 +19,8 @@ volatile int globsize = 0;
 int recstat = 0;
 int lastrecstat = 0;
 int sendstat = 0;
-int handle[5] = {253, 254, 255, 255, 255};
+int handle[5] = {255, 255, 255, 255, 255};
 int logicval[3][3] = {100, 100, 0, 50, 64, 0, 150, 64, 0};
-int clockstat = 0;
 
 /*
 Logicval:
@@ -147,27 +146,12 @@ void delay()
 void handles()
 {
 	int temp = read();
-	int tempclk = (PIND & 1);
-	if(tempclk)//clockstat != tempclk)
+	recstat = status();
+	if(lastrecstat == recstat && temp != 255)
 	{
-		if(clockstat != tempclk)
-		{
-			clockstat = tempclk;
-			recstat++;
-			if(temp == 255 || recstat == 5)
-			{
-				recstat = 0;
-			}
-			else
-			{
-				handle[recstat-1] = temp;
-			}
-		}
+		handle[recstat] = temp;
 	}
-	else
-	{
-		clockstat = 0;
-	}
+	lastrecstat = recstat;
 }
 
 int read()
@@ -199,10 +183,32 @@ int size(char Input[])
 	return 0;
 }
 
+int status()
+{
+	int vala = (PIND & 1), valb = (PIND & 2);
+	if(!vala && !valb) //Status: 0,0
+	{
+		return 0;
+	}
+	else if(vala && !valb) //Status: 1,0
+	{
+		return 1;
+	}
+	else if(vala && valb) //Status: 1,1
+	{
+		return 2;
+	}
+	else if(!vala && valb) //Status: 0,1
+	{
+		return 3;
+	}
+	return 4; //Burde aldrig komme herned...
+}
+
 void debug()
 {
 	char SoonSoonToBe[5];   //Display Values!!
-	sprintf(SoonSoonToBe, "%d", handle[3]);
+	sprintf(SoonSoonToBe, "%d", handle[0]);
 
 	SoonToBe = SoonSoonToBe;
 	globsize = size(SoonToBe);
@@ -289,7 +295,7 @@ int main(void)
 
 		//Logik
 
-		//send();
+		send();
 
 	}
 	return 0;

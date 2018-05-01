@@ -101,54 +101,61 @@ ychange = 1;
 radiusError = 0;
 while(x >= y)
   {
-		if(!isReserved(cx+x,cy+y))
-			GLCD_SetPixel(cx+x, cy+y, 0);
+		int o;
+		for(o=-x;o<=x;o++)
+		{
+			if(!isReserved(cx+o,cy+y))
+				GLCD_SetPixel(cx+o, cy+y, 0);
 
-		if(!isReserved(cx-x,cy+y))
-	    GLCD_SetPixel(cx-x, cy+y, 0);
+			if(!isReserved(cx-o,cy+y))
+				GLCD_SetPixel(cx-o, cy+y, 0);
 
-		if(!isReserved(cx-x,cy-y))
-	    GLCD_SetPixel(cx-x, cy-y, 0);
+			if(!isReserved(cx-o,cy-y))
+				GLCD_SetPixel(cx-o, cy-y, 0);
 
-		if(!isReserved(cx+x,cy-y))
-	    GLCD_SetPixel(cx+x, cy-y, 0);
+			if(!isReserved(cx+o,cy-y))
+				GLCD_SetPixel(cx+o, cy-y, 0);
 
-		if(!isReserved(cx+y,cy+x))
-	    GLCD_SetPixel(cx+y, cy+x, 0);
+			if(!isReserved(cx+y,cy+o))
+				GLCD_SetPixel(cx+y, cy+o, 0);
 
-		if(!isReserved(cx-y,cy+x))
-	    GLCD_SetPixel(cx-y, cy+x, 0);
+			if(!isReserved(cx-y,cy+o))
+				GLCD_SetPixel(cx-y, cy+o, 0);
 
-		if(!isReserved(cx-y,cy-x))
-	    GLCD_SetPixel(cx-y, cy-x, 0);
+			if(!isReserved(cx-y,cy-o))
+				GLCD_SetPixel(cx-y, cy-o, 0);
 
-		if(!isReserved(cx+y,cy-x))
-	    GLCD_SetPixel(cx+y, cy-x, 0);
+			if(!isReserved(cx+y,cy-o))
+				GLCD_SetPixel(cx+y, cy-o, 0);
+
+			if(!isReserved(a+o,b+y))
+				GLCD_SetPixel(a+o, b+y, 1);
+
+			if(!isReserved(a-o, b+y))
+				GLCD_SetPixel(a-o, b+y, 1);
+
+			if(!isReserved(a-o, b-y))
+				GLCD_SetPixel(a-o, b-y, 1);
+
+			if(!isReserved(a+o, b-y))
+				GLCD_SetPixel(a+o, b-y, 1);
+
+			if(!isReserved(a+y, b+o))
+				GLCD_SetPixel(a+y, b+o, 1);
+
+			if(!isReserved(a-y, b+o))
+				GLCD_SetPixel(a-y, b+o, 1);
+
+			if(!isReserved(a-y, b-o))
+				GLCD_SetPixel(a-y, b-o, 1);
+
+			if(!isReserved(a+y, b-o))
+				GLCD_SetPixel(a+y, b-o, 1);
+		}
 
 
-		if(!isReserved(a+x,b+y))
-			GLCD_SetPixel(a+x, b+y, 1);
 
-		if(!isReserved(a-x, b+y))
-			GLCD_SetPixel(a-x, b+y, 1);
 
-		if(!isReserved(a-x, b-y))
-			GLCD_SetPixel(a-x, b-y, 1);
-
-		if(!isReserved(a+x, b-y))
-			GLCD_SetPixel(a+x, b-y, 1);
-
-		if(!isReserved(a+y, b+x))
-			GLCD_SetPixel(a+y, b+x, 1);
-
-		if(!isReserved(a-y, b+x))
-			GLCD_SetPixel(a-y, b+x, 1);
-
-		if(!isReserved(a-y, b-x))
-			GLCD_SetPixel(a-y, b-x, 1);
-
-		if(!isReserved(a+y, b-x))
-			GLCD_SetPixel(a+y, b-x, 1);
     y++;
     radiusError += ychange;
     ychange += 2;
@@ -300,13 +307,14 @@ int main(void)
 
 	while(1)
 	{
-		recieve();
+		/*recieve();
 		GLCD_TextGoTo(0,0);
 		sprintf(str, "%d", 22+logicval[0][0]);
 		GLCD_WriteString(str);
 		MOVE_Ball(oldx, oldy, logicval[0][0], logicval[0][1]);
 		oldx = logicval[0][0];
-		oldy = logicval[0][1];
+		oldy = logicval[0][1];*/
+		draw_ball_test();
 	}
 	return 0;
 }

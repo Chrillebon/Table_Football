@@ -5,8 +5,8 @@
 
 void timer0_init()
 {
-    // set up timer with prescaler = 256 /*1024*/
-    TCCR0 |= (1 << CS02)/*|(1 << CS00)*/;
+    // set up timer with prescaler = 64 /*1024*/
+    TCCR0 |= (1 << CS02)|(1 << CS00);
 
     // initialize counter
     TCNT0 = 0;
@@ -31,6 +31,8 @@ void oflow()
   h1_value = 127;
   h2_value = 127;
   overflow = 0;
+  PORTB &= ~smart[0]; // Skal ikke modtage nu
+  send();
 }
 
 void initialize(){
@@ -71,66 +73,28 @@ void send()
 {
   //B6 og B7 er status
   //PORTD er værdier
-  if(sendstat < 5) //pos1
+  if(sendstat == 0)
   {
-    PORTB |= smart[0]; //Skal ikke modtage i anden ende (aktiv lav)
-    PORTD = 0; //Skal ikke sende fejlværdier
-    //status = 0,0
-    PORTB &= ~smart[6];
-    PORTB &= ~smart[7];
+    PORTD = 255;
+  }
+  else if(sendstat == 1) //pos1
+  {
     PORTD = p1_value;
-    delay();
-    PORTB &= ~smart[0]; //Kan godt modtage fra nu af
-    /*PORTB &= ~smart[6];
-    int i=0;
-    for(;i<8;i++)
-    {
-      if(p1_value & smart[i])
-      {
-        PORTB |= smart[6];
-      }
-      else
-      {
-        PORTB &= ~smart[6];
-      }
-    }
-    PORTB |= smart[6];*/
   }
-  else if(sendstat >= 5 && sendstat < 10) //speed1
+  else if(sendstat == 2) //speed1
   {
-    PORTB |= smart[0]; //Skal ikke modtage i anden ende (aktiv lav)
-    PORTD = 0; //Skal ikke sende fejlværdier
-    //status = 1,0
-    PORTB |= smart[6];
-    PORTB &= ~smart[7];
     PORTD = diff1;
-    delay();
-    PORTB &= ~smart[0]; //Kan godt modtage fra nu af
   }
-  else if(sendstat >= 10 && sendstat < 15) //pos2
+  else if(sendstat == 3) //pos2
   {
-    PORTB |= smart[0]; //Skal ikke modtage i anden ende (aktiv lav)
-    PORTD = 0; //Skal ikke sende fejlværdier
-    //status = 1,1
-    PORTB |= smart[6];
-    PORTB |= smart[7];
     PORTD = p2_value;
-    delay();
-    PORTB &= ~smart[0]; //Kan godt modtage fra nu af
   }
-  else if(sendstat >= 15 && sendstat < 20) //speed2
+  else if(sendstat == 4) //speed2
   {
-    PORTB |= smart[0]; //Skal ikke modtage i anden ende (aktiv lav)
-    PORTD = 0; //Skal ikke sende fejlværdier
-    //status = 0,1
-    PORTB &= ~smart[6];
-    PORTB |= smart[7];
     PORTD = diff2;
-    delay();
-    PORTB &= ~smart[0]; //Kan godt modtage fra nu af
   }
   sendstat++;
-  if(sendstat >= 20)//8) //reset
+  if(sendstat >= 5)//8) //reset
   {
     sendstat = 0;
   }
@@ -147,14 +111,13 @@ int main(void)
     speed1();
     rot2();
     speed2();
-    if(overflow >= 1)
+    if(overflow == 2)
+    {
+      PORTB |= smart[0]; //Nu kan den modtage
+    }
+    if(overflow >= 3)
     {
       oflow();
     }
-    if(slowsend == 3)
-    {
-      send();
-    }
-    slowsend = (slowsend+1)%4;
   }
 }
