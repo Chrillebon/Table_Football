@@ -15,7 +15,18 @@
 #include <stdbool.h>
 //#include "GLCD_Logic.h"
 
-int r, newx, newy, oldx, oldy;
+int r, newx, newy, oldx, oldy, lastrecstat = 0, recstat = 0;
+int logicval[3][3] = {100, 100, 99, 60, 64, 0, 180, 64, 0};
+
+/*
+Logicval
+			0				1				2
+0		ballx		bally		*ball-speed*
+1		*p1-x*	p1-y		*p1-speed*
+2		*p2-x*	p2-y		*p2-speed*
+
+**: not in use
+*/
 
 void initialize(){
 	DDRD = 0x00; //Læse input
@@ -23,7 +34,7 @@ void initialize(){
 	GLCD_ClearText();
 	GLCD_ClearCG();
 	GLCD_ClearGraphic();
-	r=30;
+	r=3;
 }
 
 bool isReserved(unsigned char x, unsigned char y)
@@ -150,18 +161,8 @@ while(x >= y)
   }
 }
 
-
-int main(void)
+void draw_field()
 {
-	initialize();
-	//GLCD_FillRectangle(119, 0, 2, 128, 0);
-	//GLCD_Ball(100,60,3,0);
-	int i=0;
-	oldx = 10;
-	oldy = 20;
-	newx = 200;
-	newy = 20;
-
 	GLCD_FillRectangle(17,0,2,128,0); //Venstre side
 	GLCD_Rectangle(18,33,30,60); //Venstre Straffefelt
 	GLCD_Rectangle(18,45,10,36); //Venstre Målfelt
@@ -180,40 +181,132 @@ int main(void)
 	GLCD_FillRectangle(239-37-2,62,2,2,0); //Højre Straffeplet
 	GLCD_FillRectangle(239-17-1,47,1,32,1); //Tyndere højre strej
 	GLCD_Rectangle(239-15-4,47,4,32); //Højre Målkasse
+}
+
+int read()
+{
+	int res = 0, t = 128, u = 1;
+	for(int i=0;i<8;i++)
+	{
+		if(PIND & t)
+		{
+			res+=u;
+		}
+		t /= 2;
+		u *= 2;
+	}
+	return res;
+}
+
+int status()
+{
+	int vala = (PINB & 2), valb = (PINB & 1);
+	if(!vala && !valb) //Status: 0,0
+	{
+		return 0;
+	}
+	else if(vala && !valb) //Status: 1,0
+	{
+		return 1;
+	}
+	else if(vala && valb) //Status: 1,1
+	{
+		return 2;
+	}
+	else if(!vala && valb) //Status: 0,1
+	{
+		return 3;
+	}
+	return 4; //Burde aldrig komme herned...
+}
+
+void recieve()
+{
+	int temp = read();
+	recstat = status();
+	if(lastrecstat == recstat && temp != 255)
+	{
+		if(recstat == 0)
+		{
+			logicval[0][0] = temp;
+		}
+		if(recstat == 1)
+		{
+			logicval[0][1] = temp;
+		}
+		if(recstat == 2)
+		{
+			logicval[1][1] = temp;
+		}
+		if(recstat == 3)
+		{
+			logicval[2][1] = temp;
+		}
+	}
+	lastrecstat = recstat;
+}
+
+void draw_ball_test()
+{
+	MOVE_Ball(oldx,oldy,newx,newy);
+	oldx = newx;
+	oldy = newy;
+	newx = 150;
+	newy = 120;
+	MOVE_Ball(oldx,oldy,newx,newy);
+	oldx = newx;
+	oldy = newy;
+	newx = 60;
+	newy = 30;
+	MOVE_Ball(oldx,oldy,newx,newy);
+	oldx = newx;
+	oldy = newy;
+	newx = 80;
+	newy = 80;
+	MOVE_Ball(oldx,oldy,newx,newy);
+	oldx = newx;
+	oldy = newy;
+	newx = 120;
+	newy = 50;
+	MOVE_Ball(oldx,oldy,newx,newy);
+	/*for(int o=0;o<1000;o++)
+	{
+		delay();
+	}*/
+	oldx = newx;
+	oldy = newy;
+	newx = 200;
+	newy = 20;
+}
 
 
+int main(void)
+{
+	initialize();
+	//GLCD_FillRectangle(119, 0, 2, 128, 0);
+	//GLCD_Ball(100,60,3,0);
+	oldx = 10;
+	oldy = 20;
+	newx = 200;
+	newy = 20;
+
+	draw_field();
+	//draw_ball_test();
+
+	oldx = 0;
+	oldy = 0;
+
+	char str[5];
 
 	while(1)
 	{
-		MOVE_Ball(oldx,oldy,newx,newy);
-		oldx = newx;
-		oldy = newy;
-		newx = 150;
-		newy = 120;
-		MOVE_Ball(oldx,oldy,newx,newy);
-		oldx = newx;
-		oldy = newy;
-		newx = 60;
-		newy = 30;
-		MOVE_Ball(oldx,oldy,newx,newy);
-		oldx = newx;
-		oldy = newy;
-		newx = 80;
-		newy = 80;
-		MOVE_Ball(oldx,oldy,newx,newy);
-		oldx = newx;
-		oldy = newy;
-		newx = 120;
-		newy = 50;
-		MOVE_Ball(oldx,oldy,newx,newy);
-		/*for(int o=0;o<1000;o++)
-		{
-			delay();
-		}*/
-		oldx = newx;
-		oldy = newy;
-		newx = 200;
-		newy = 20;
+		recieve();
+		GLCD_TextGoTo(0,0);
+		sprintf(str, "%d", 22+logicval[0][0]);
+		GLCD_WriteString(str);
+		MOVE_Ball(oldx, oldy, logicval[0][0], logicval[0][1]);
+		oldx = logicval[0][0];
+		oldy = logicval[0][1];
 	}
 	return 0;
 }

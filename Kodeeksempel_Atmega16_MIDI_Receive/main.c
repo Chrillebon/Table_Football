@@ -14,24 +14,29 @@
 
 volatile int Global_Time = 0;
 volatile int t = 0;
-//int i;
 volatile int this = 0;
 volatile int globsize = 0;
-//volatile int write = 48;
-volatile int val = 0;
-int tal;
+int recstat = 0;
+int lastrecstat = 0;
 int sendstat = 0;
-int laststat = 0;
-int newvalue;
-int handle[5] = {99, 99, 99, 99, 99};
+int handle[5] = {255, 255, 255, 255, 255};
+int logicval[3][3] = {100, 100, 0, 50, 64, 0, 150, 64, 0};
+
+/*
+Logicval:
+			0				1				2
+0		ballx		bally		ballspeed
+1		p1-x		p1-y		p1-speed
+2		p2-x		p2-y		p2-speed
+*/
 
 
 
 void initialize(){
 	DDRC = 0xFF;
-	DDRD = 0b11111000;
+	DDRD = 0b11111100;
 	DDRA = 0x00;
-	DDRB = 0x00;
+	DDRB = 0xFF;
 	sei();
 }
 
@@ -120,26 +125,33 @@ void display(int t) //Oversættelse fra hvad man skal læse til hvad der står p
 void Light_It_Up(int i)
 {
 	rensinput(); //2*globsize
-	PORTC = PORTC | 0b01111111;
-	PORTD = PORTD & 0b10000111;
-	PORTD = PORTD | DISPLAYS[i];
-	PORTC = PORTC & ((~ choices[i]) | 0b10000000);
+	if(i!=3)
+	{
+		PORTC = PORTC | 0b01111111;
+		PORTD = PORTD & 0b10000111;
+		PORTD = PORTD | DISPLAYS[i];
+		PORTC = PORTC & ((~ choices[i]) | 0b10000000);
+	}
 	//Timere der tæller opad
 	Global_Time++;
 }
 
+void delay()
+{
+	int i=0;
+	for(;i<1000;i++)
+	{}
+}
+
 void handles()
 {
-	if(!(PIND & 4))
+	int temp = read();
+	recstat = status();
+	if(lastrecstat == recstat && temp != 255)
 	{
-		int temp = read();
-		sendstat = status();
-		handle[1] = sendstat;
+		handle[recstat] = temp;
 	}
-	/*if(laststat == sendstat)
-	{
-	}
-	laststat = sendstat;*/
+	lastrecstat = recstat;
 }
 
 int read()
@@ -171,30 +183,6 @@ int size(char Input[])
 	return 0;
 }
 
-int givemevalues(int t){
-	if(t == 00){
-		PORTD |= 0b00000000;
-		for(int i=0;i<1000;i++){}
-
-	}
-
-	else if(t == 01){
-		PORTD |= 0b00000001;
-		for(int i=0;i<1000;i++){}
-	}
-
-	else if(t == 10){
-		PORTD |= 0b00000010;
-		for(int i=0;i<1000;i++){}
-	}
-
-	else if(t == 11){
-		PORTD |= 0b00000011;
-		for(int i=0;i<1000;i++){}
-	}
-	return read();
-}
-
 int status()
 {
 	int vala = (PIND & 1), valb = (PIND & 2);
@@ -217,127 +205,99 @@ int status()
 	return 4; //Burde aldrig komme herned...
 }
 
+void debug()
+{
+	char SoonSoonToBe[5];   //Display Values!!
+	sprintf(SoonSoonToBe, "%d", handle[0]);
+
+	SoonToBe = SoonSoonToBe;
+	globsize = size(SoonToBe);
+	rensinput();
+
+	display(t); //Gør klar til hvad der skal stå på display
+
+	Light_It_Up(this); //Tænder rent faktisk lyset i displays
+
+
+	if(Global_Time > 1.5*1000) //rykker bogstaver og tal på display efter tid
+	{
+		if(globsize>4) t++;
+		Global_Time = 0;
+	}
+
+	//Går igennem alle mulige bogstaver/tal til der er blankt display, og starter igen.
+	if(t > globsize+3)
+	{
+		t = 0;
+	}
+
+
+	//Tæller display op
+	this++;
+	if(this>=4)
+	{
+		this = 0;
+	}
+}
+
+void send()
+{
+	//--------------------------------------------
+	logicval[0][0] = handle[0];
+	logicval[0][1] = handle[2];
+	//--------------------------------------------
+	if(sendstat < 5)
+	{
+		PORTD &= ~4;
+		PORTD &= ~8;
+		PORTB = logicval[0][0];
+	}
+	else if(sendstat >= 5 && sendstat < 10)
+	{
+		PORTD |= 4;
+		PORTD &= ~8;
+		PORTB = logicval[0][1];
+	}
+	else if(sendstat >= 10 && sendstat < 15)
+	{
+		PORTD |= 4;
+		PORTD |= 8;
+		PORTB = logicval[1][1];
+	}
+	else if(sendstat >= 15 && sendstat < 20)
+	{
+		PORTD &= ~4;
+		PORTD |= 8;
+		PORTB = logicval[2][1];
+		sendstat = -1;
+	}
+	sendstat++;
+	if(sendstat == 5 || sendstat == 10 || sendstat == 15)
+	{
+		PORTB = 255;
+	}
+	if(sendstat >= 5) //reset
+  {
+    sendstat = 0;
+  }
+}
 
 int main(void)
 {
 
 	initialize();
 	timer0_init();
-	int value = 0;
-	/*p1speedold = p1speed;
-	p1speed = givemevalues(10);
-	p1placeold = p1place;
-	p1place = givemevalues(01);
-	p2speedold = p2speed;
-	p2speed = givemevalues(11);
-	p2placeold = p2place;
-	p2place = givemevalues(00);*/
-
 
 	while(1){
-
-		//Udfør ingenting, vent på interrupts
-		/*if(write == 48)
-		{
-			globsize = 4;
-		}*/
-
-
-		/*if (PINA & 1<<PA0){
-			val += 1;
-
-		} else {
-			val -= 1;
-
-		}*/
-
-		//val += 1;
-		/*	p1speedold = p1speed;
-		p1speed = givemevalues(10);
-		p1placeold = p1place;
-		p1place = givemevalues(01);
-		p2speedold = p2speed;
-		p2speed = givemevalues(11);
-		p2placeold = p2place;
-		p2place = givemevalues(00);*/
-
-
-		/*if (p1speed != p1speedold){
-			tal = 10;
-		}
-		if (p2speed != p2speedold){
-			tal = 11;
-		}
-		if (p1place != p1placeold){
-			tal = 01;
-		}
-		if (p2place != p2placeold){
-			tal = 00;
-		}*/
-
-	/*	tal = 11;//01//10//11
-		if (p2speed != p2speedold){
-			tal = 10;
-		}*//*else{
-			tal = 11;
-		}*/
-		/*if (givemevalues(1)!=p1place){
-			tal = 1;
-		}
-		if (givemevalues(10)!=p1speed){
-			tal = 10;
-		}
-		if (givemevalues(11)!=p2speed){
-			tal = 11;
-		}
-		if (givemevalues(0)!=p2place){
-			tal = 0;
-		}*/
-		if (val >= 10000){
-			val = 0;
-
-		}
-		if (val < 0){
-			val = 9999;
-
-		}
-		//char v = "1";
 		handles();
 
-		char SoonSoonToBe[5];   //Display Values!!
-		sprintf(SoonSoonToBe, "%d", handle[1]);
+		debug();
 
-		SoonToBe = SoonSoonToBe;
-		globsize = size(SoonToBe);
-		rensinput();
+		//Logik
 
-		display(t); //Gør klar til hvad der skal stå på display
+		send();
 
-		Light_It_Up(this); //Tænder rent faktisk lyset i displays
-
-
-		if(Global_Time > 1.5*1000) //rykker bogstaver og tal på display efter tid
-		{
-			if(globsize>4) t++;
-			Global_Time = 0;
-		}
-
-		//Går igennem alle mulige bogstaver/tal til der er blankt display, og starter igen.
-		if(t > globsize+3)
-		{
-			t = 0;
-		}
-
-
-		//Tæller display op
-		this++;
-		if(this>=4)
-		{
-			this = 0;
-		}
 	}
 	return 0;
-
-
 
 	}

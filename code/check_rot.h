@@ -4,7 +4,7 @@ int p1_state2;
 int p2_state1;
 int p2_state2;*/
 
-int p1_value = 100;
+int p1_value = 170;
 int p2_value = 100;
 
 int h1_value = 127;

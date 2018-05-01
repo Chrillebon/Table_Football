@@ -34,9 +34,9 @@ void oflow()
 }
 
 void initialize(){
-DDRC=0b00000000;
-DDRB=0b00111110;
-DDRD=0b11111111;
+DDRC=0x00;
+DDRB=0b11111001;
+DDRD=0xFF;
 timer0_init();
 }
 
@@ -54,12 +54,17 @@ void memset(int arr[2][4])
 
 void delay()
 {
-  delayval = 0;
-  while(delayval < 1000)
+  /*delayval = 0;
+  while(delayval < 10)
   {
     //Vent
   }
-  return;
+  return;*/
+  int i=0;
+  for(;i<1000;i++)
+  {
+    //w8
+  }
 }
 
 void send()
@@ -76,8 +81,22 @@ void send()
     PORTD = p1_value;
     delay();
     PORTB &= ~smart[0]; //Kan godt modtage fra nu af
+    /*PORTB &= ~smart[6];
+    int i=0;
+    for(;i<8;i++)
+    {
+      if(p1_value & smart[i])
+      {
+        PORTB |= smart[6];
+      }
+      else
+      {
+        PORTB &= ~smart[6];
+      }
+    }
+    PORTB |= smart[6];*/
   }
-  else if(sendstat >=5 && sendstat < 10) //speed1
+  else if(sendstat >= 5 && sendstat < 10) //speed1
   {
     PORTB |= smart[0]; //Skal ikke modtage i anden ende (aktiv lav)
     PORTD = 0; //Skal ikke sende fejlværdier
