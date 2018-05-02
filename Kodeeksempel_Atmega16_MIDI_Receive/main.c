@@ -19,8 +19,8 @@ volatile int globsize = 0;
 int recstat = 0;
 int lastrecstat = 0;
 int sendstat = 0;
-int handle[5] = {253, 254, 255, 255, 255};
-int logicval[3][3] = {100, 100, 0, 50, 64, 0, 150, 64, 0};
+int handle[5] = {0, 254, 255, 255, 255};
+int logicval[3][3] = {100, 100, 0, 50, 62, 0, 150, 61, 0};
 int clockstat = 0;
 
 /*
@@ -35,7 +35,7 @@ Logicval:
 
 void initialize(){
 	DDRC = 0xFF;
-	DDRD = 0b11111100;
+	DDRD = 0b11111110;
 	DDRA = 0x00;
 	DDRB = 0xFF;
 	sei();
@@ -152,6 +152,7 @@ void handles()
 	{
 		if(clockstat != tempclk)
 		{
+			PORTD |= 2; //Nu kan GPU modtage
 			clockstat = tempclk;
 			recstat++;
 			if(temp == 255 || recstat == 5)
@@ -164,8 +165,12 @@ void handles()
 			}
 		}
 	}
-	else
+	else //Den er lige skiftet
 	{
+		if(clockstat != tempclk)
+		{
+			send();
+		}
 		clockstat = 0;
 	}
 }
@@ -202,7 +207,7 @@ int size(char Input[])
 void debug()
 {
 	char SoonSoonToBe[5];   //Display Values!!
-	sprintf(SoonSoonToBe, "%d", handle[3]);
+	sprintf(SoonSoonToBe, "%d", handle[0]);
 
 	SoonToBe = SoonSoonToBe;
 	globsize = size(SoonToBe);
@@ -236,44 +241,52 @@ void debug()
 
 void send()
 {
-	//--------------------------------------------
-	logicval[0][0] = handle[0];
-	logicval[0][1] = handle[2];
-	//--------------------------------------------
-	if(sendstat < 5)
+	PORTD &= ~2; //Nu skal GPU ikke modtage
+	if(sendstat == 0)
 	{
+		PORTB = 255;
+	}
+	if(sendstat == 1) // Ball-x
+	{
+		//Status: 0,0
 		PORTD &= ~4;
 		PORTD &= ~8;
 		PORTB = logicval[0][0];
 	}
-	else if(sendstat >= 5 && sendstat < 10)
+	else if(sendstat == 2) //Ball-y
 	{
+		//Status: 1,0
 		PORTD |= 4;
 		PORTD &= ~8;
 		PORTB = logicval[0][1];
 	}
-	else if(sendstat >= 10 && sendstat < 15)
+	else if(sendstat == 3) // P1-y
 	{
+		//Status: 1,1
 		PORTD |= 4;
 		PORTD |= 8;
-		PORTB = logicval[1][1];
+		PORTB = handle[0];//logicval[1][1];
 	}
-	else if(sendstat >= 15 && sendstat < 20)
+	else if(sendstat == 4) // P2-y
 	{
+		//Status: 0,1
 		PORTD &= ~4;
 		PORTD |= 8;
-		PORTB = logicval[2][1];
-		sendstat = -1;
+		PORTB = handle[2];//logicval[2][1];
 	}
 	sendstat++;
-	if(sendstat == 5 || sendstat == 10 || sendstat == 15)
-	{
-		PORTB = 255;
-	}
 	if(sendstat >= 5) //reset
   {
     sendstat = 0;
   }
+}
+
+void logic()
+{
+	//updating values-------for debug og stiltest---------
+	logicval[1][1] = handle[0];
+	logicval[2][1] = handle[2];
+	//----------------------------------------------------
 }
 
 int main(void)
@@ -285,9 +298,9 @@ int main(void)
 	while(1){
 		handles();
 
-		debug();
+		logic();
 
-		//Logik
+		debug();
 
 		//send();
 

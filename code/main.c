@@ -5,8 +5,8 @@
 
 void timer0_init()
 {
-    // set up timer with prescaler = 64 /*1024*/
-    TCCR0 |= (1 << CS02)|(1 << CS00);
+    // set up timer with prescaler = 254 /*1024*/
+    TCCR0 |= (1 << CS01) & ~(1 << CS02);
 
     // initialize counter
     TCNT0 = 0;
@@ -94,7 +94,7 @@ void send()
     PORTD = diff2;
   }
   sendstat++;
-  if(sendstat >= 5)//8) //reset
+  if(sendstat >= 5) //reset
   {
     sendstat = 0;
   }
@@ -115,7 +115,7 @@ int main(void)
     {
       PORTB |= smart[0]; //Nu kan den modtage
     }
-    if(overflow >= 3)
+    if(overflow >= 4)
     {
       oflow();
     }

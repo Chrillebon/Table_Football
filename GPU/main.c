@@ -15,8 +15,8 @@
 #include <stdbool.h>
 //#include "GLCD_Logic.h"
 
-int r, newx, newy, oldx, oldy, lastrecstat = 0, recstat = 0;
-int logicval[3][3] = {100, 100, 99, 60, 64, 0, 180, 64, 0};
+int r, newx, newy, oldx, oldy, lastrecstat = 0, recstat = 0, clockstat = 0, debug = 0;
+int logicval[3][3] = {100, 100, 99, 60, 99, 0, 180, 99, 0};
 
 /*
 Logicval
@@ -30,6 +30,7 @@ Logicval
 
 void initialize(){
 	DDRD = 0x00; //Læse input
+	DDRB = 0x00; //Læse status
 	GLCD_Initalize();
 	GLCD_ClearText();
 	GLCD_ClearCG();
@@ -102,7 +103,7 @@ radiusError = 0;
 while(x >= y)
   {
 		int o;
-		for(o=-x;o<=x;o++)
+		for(o=0;o<2;o++)//o=-x;o<=x;o++)
 		{
 			if(!isReserved(cx+o,cy+y))
 				GLCD_SetPixel(cx+o, cy+y, 0);
@@ -207,7 +208,7 @@ int read()
 
 int status()
 {
-	int vala = (PINB & 2), valb = (PINB & 1);
+	int vala = (PINB & 4), valb = (PINB & 2);
 	if(!vala && !valb) //Status: 0,0
 	{
 		return 0;
@@ -222,6 +223,7 @@ int status()
 	}
 	else if(!vala && valb) //Status: 0,1
 	{
+		GLCD_Circle(128,64,20,0);
 		return 3;
 	}
 	return 4; //Burde aldrig komme herned...
@@ -229,28 +231,49 @@ int status()
 
 void recieve()
 {
-	int temp = read();
-	recstat = status();
-	if(lastrecstat == recstat && temp != 255)
+	char damn[5];
+	debug = 0;
+	while(debug < 5)
 	{
-		if(recstat == 0)
+		int temp = read();
+		int tempclk = (PINB & 1);
+		recstat = status();
+		if(tempclk)
 		{
-			logicval[0][0] = temp;
+			if(clockstat != tempclk)
+			{
+				debug++;
+				clockstat = tempclk;
+				sprintf(damn, "%d", recstat);
+				GLCD_TextGoTo(4,0);
+				GLCD_WriteString(damn);
+				if(recstat == 4 || temp == 255)
+				{
+					//Gør intet
+				}
+				else if(recstat == 0)
+				{
+					logicval[0][0] = temp;
+				}
+				else if(recstat == 1)
+				{
+					logicval[0][1] = temp;
+				}
+				else if(recstat == 2)
+				{
+					logicval[1][1] = temp;
+				}
+				else if(recstat == 3)
+				{
+					logicval[2][1] = temp;
+				}
+			}
 		}
-		if(recstat == 1)
+		else
 		{
-			logicval[0][1] = temp;
-		}
-		if(recstat == 2)
-		{
-			logicval[1][1] = temp;
-		}
-		if(recstat == 3)
-		{
-			logicval[2][1] = temp;
+			clockstat = 0;
 		}
 	}
-	lastrecstat = recstat;
 }
 
 void draw_ball_test()
@@ -307,14 +330,18 @@ int main(void)
 
 	while(1)
 	{
-		/*recieve();
+		int i=0;
+		recieve();
 		GLCD_TextGoTo(0,0);
-		sprintf(str, "%d", 22+logicval[0][0]);
+		sprintf(str, "%d", logicval[1][1]);
 		GLCD_WriteString(str);
-		MOVE_Ball(oldx, oldy, logicval[0][0], logicval[0][1]);
-		oldx = logicval[0][0];
-		oldy = logicval[0][1];*/
-		draw_ball_test();
+		GLCD_TextGoTo(0,2);
+		sprintf(str, "%d", logicval[2][1]);
+		GLCD_WriteString(str);
+		MOVE_Ball(oldx, oldy, logicval[1][1], logicval[2][1]); // <-------
+		oldx = logicval[1][1];
+		oldy = logicval[2][1];
+		//draw_ball_test();
 	}
 	return 0;
 }
