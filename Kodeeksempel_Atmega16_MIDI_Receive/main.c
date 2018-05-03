@@ -152,7 +152,7 @@ void handles()
 	{
 		if(clockstat != tempclk)
 		{
-			PORTD |= 2; //Nu kan GPU modtage
+			//PORTD |= 2; //Nu kan GPU modtage
 			clockstat = tempclk;
 			recstat++;
 			if(temp == 255 || recstat == 5)
@@ -241,7 +241,7 @@ void debug()
 
 void send()
 {
-	PORTD &= ~2; //Nu skal GPU ikke modtage
+	//PORTD &= ~2; //Nu skal GPU ikke modtage
 	if(sendstat == 0)
 	{
 		PORTB = 255;
@@ -249,29 +249,29 @@ void send()
 	if(sendstat == 1) // Ball-x
 	{
 		//Status: 0,0
-		PORTD &= ~4;
-		PORTD &= ~8;
+		/*PORTD &= ~4;
+		PORTD &= ~8;*/
 		PORTB = logicval[0][0];
 	}
 	else if(sendstat == 2) //Ball-y
 	{
 		//Status: 1,0
-		PORTD |= 4;
-		PORTD &= ~8;
+		/*PORTD |= 4;
+		PORTD &= ~8;*/
 		PORTB = logicval[0][1];
 	}
 	else if(sendstat == 3) // P1-y
 	{
 		//Status: 1,1
-		PORTD |= 4;
-		PORTD |= 8;
+		/*PORTD |= 4;
+		PORTD |= 8;*/
 		PORTB = handle[0];//logicval[1][1];
 	}
 	else if(sendstat == 4) // P2-y
 	{
 		//Status: 0,1
-		PORTD &= ~4;
-		PORTD |= 8;
+		/*PORTD &= ~4;
+		PORTD |= 8;*/
 		PORTB = handle[2];//logicval[2][1];
 	}
 	sendstat++;

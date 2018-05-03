@@ -15,7 +15,7 @@
 #include <stdbool.h>
 //#include "GLCD_Logic.h"
 
-int r, newx, newy, oldx, oldy, lastrecstat = 0, recstat = 0, clockstat = 0, debug = 0;
+int r, newx, newy, oldx, oldy, lastrecstat = 0, recstat = 0, clockstat = 0, debug = 0, temprec[5];
 int logicval[3][3] = {100, 100, 99, 60, 99, 0, 180, 99, 0};
 
 /*
@@ -223,7 +223,6 @@ int status()
 	}
 	else if(!vala && valb) //Status: 0,1
 	{
-		GLCD_Circle(128,64,20,0);
 		return 3;
 	}
 	return 4; //Burde aldrig komme herned...
@@ -232,46 +231,65 @@ int status()
 void recieve()
 {
 	char damn[5];
-	debug = 0;
-	while(debug < 5)
+	recstat = 0;
+	while(recstat < 5)
 	{
 		int temp = read();
 		int tempclk = (PINB & 1);
-		recstat = status();
 		if(tempclk)
 		{
 			if(clockstat != tempclk)
 			{
-				debug++;
 				clockstat = tempclk;
 				sprintf(damn, "%d", recstat);
 				GLCD_TextGoTo(4,0);
 				GLCD_WriteString(damn);
-				if(recstat == 4 || temp == 255)
-				{
-					//Gør intet
-				}
-				else if(recstat == 0)
-				{
-					logicval[0][0] = temp;
-				}
-				else if(recstat == 1)
-				{
-					logicval[0][1] = temp;
-				}
-				else if(recstat == 2)
-				{
-					logicval[1][1] = temp;
-				}
-				else if(recstat == 3)
-				{
-					logicval[2][1] = temp;
-				}
+				temprec[recstat] = temp;
+				recstat++;
 			}
 		}
 		else
 		{
 			clockstat = 0;
+		}
+	}
+	//Skal nu til at fordele de midlertidige værdier ind på de rigtige værdier -----------------------
+	int forskudt=0;
+	for(;forskudt<5;forskudt++)
+	{
+		if(temprec[forskudt] == 255)
+		{
+			break;
+		}
+	}
+	sprintf(damn, "%d", forskudt);
+	GLCD_TextGoTo(0,5);
+	GLCD_WriteString(damn);
+	int i=0;
+	for(;i<5;i++)
+	{
+		sprintf(damn, "%d", temprec[(i+forskudt)%5]);
+		GLCD_TextGoTo(0,7+i);
+		GLCD_WriteString(damn);
+		if(i == 0)
+		{
+			//Gør intet
+		}
+		else if(i == 1)
+		{
+			logicval[0][0] = temprec[(i+forskudt)%5];
+		}
+		else if(i == 2)
+		{
+			logicval[0][1] = temprec[(i+forskudt)%5];
+		}
+		else if(i == 3)
+		{
+			logicval[1][1] = temprec[(i+forskudt)%5];
+		}
+		else if(i == 4)
+		{
+			logicval[2][1] = temprec[(i+forskudt)%5];
 		}
 	}
 }
