@@ -77,13 +77,12 @@ int ALPHABET[26] = {
 //sæt 0. pin til jord i første display osv.
 //gem dette som DDRX = position
 //Hvor X er en gruppe (A, B, C, D) og position er en af de 4:
+#define DISPLAY_FOURTH 0b01000000
+#define DISPLAY_THIRD 0b00100000
+#define DISPLAY_SECOND 0b00010000
+#define DISPLAY_FIRST 0b00001000
 
-#define DISPLAY_FIRST 0b00010000
-#define DISPLAY_SECOND 0b00001000
-#define DISPLAY_THIRD 0b00000100
-#define DISPLAY_FOURTH 0b00000010
-
-int DISPLAYS[4] = {DISPLAY_FIRST, DISPLAY_SECOND, DISPLAY_THIRD, DISPLAY_FOURTH};
+int DISPLAYS[4] = {DISPLAY_SECOND, DISPLAY_THIRD, DISPLAY_FOURTH, DISPLAY_FIRST};
 
 //Til personlig brug i vores kode:
 char *SoonToBe;

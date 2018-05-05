@@ -35,11 +35,12 @@ void initialize(){
 	GLCD_ClearText();
 	GLCD_ClearCG();
 	GLCD_ClearGraphic();
-	r=3;
+	r=3; //Radius på bolden
 }
 
 bool isReserved(unsigned char x, unsigned char y)
 {
+	//Sørger for, at banen ikke bliver viske ud... og den har ingen memory...
 	if (x < 20) return true; //Venstre linje eller mindre
 	if (x > 219) return true; //Højre linje eller mere
 	if (x == 118) return true; //Midterlinjen
@@ -94,16 +95,18 @@ bool isReserved(unsigned char x, unsigned char y)
 
 void MOVE_Ball(unsigned char cx, unsigned char cy, unsigned char a, unsigned char b)
 {
-int x, y, xchange, ychange, radiusError;
-x = r;
-y = 0;
-xchange = 1 - 2 * r;
-ychange = 1;
-radiusError = 0;
-while(x >= y)
+	//Rykker bolden frem
+	//Kraftigt inspireret af GLCD_Circle fra Graphic.c
+	int x, y, xchange, ychange, radiusError;
+	x = r;
+	y = 0;
+	xchange = 1 - 2 * r;
+	ychange = 1;
+	radiusError = 0;
+	while(x >= y)
   {
 		int o;
-		for(o=0;o<2;o++)//o=-x;o<=x;o++)
+		for(o=0;o<2;o++) //2 lag for at gøre bolden tykkere
 		{
 			if(!isReserved(cx+o,cy+y))
 				GLCD_SetPixel(cx+o, cy+y, 0);
@@ -154,9 +157,6 @@ while(x >= y)
 				GLCD_SetPixel(a+y, b-o, 1);
 		}
 
-
-
-
     y++;
     radiusError += ychange;
     ychange += 2;
@@ -169,25 +169,25 @@ while(x >= y)
   }
 }
 
-void draw_field()
+void draw_field() //Tegner banen
 {
-	GLCD_FillRectangle(17,0,2,128,0); //Venstre side
+	GLCD_FillRectangle(17,0,2,128,1); //Venstre side
 	GLCD_Rectangle(18,33,30,60); //Venstre Straffefelt
 	GLCD_Rectangle(18,45,10,36); //Venstre Målfelt
-	GLCD_FillRectangle(37,62,2,2,0); //Venstre Straffeplet
-	GLCD_FillRectangle(17,47,1,32,1); //Tyndere venstre strej
+	GLCD_FillRectangle(37,62,2,2,1); //Venstre Straffeplet
+	GLCD_FillRectangle(17,47,1,32,0); //Tyndere venstre strej
 	GLCD_Rectangle(15,47,4,32); //Venstre Målkasse
 
-	GLCD_FillRectangle(117,62,3,3,0); //Midterprik
-	GLCD_Circle(118,63,20,0); //Midtercirkel
-	GLCD_FillRectangle(118,0,1,128,0); //Midterlinjen
+	GLCD_FillRectangle(117,62,3,3,1); //Midterprik
+	GLCD_Circle(118,63,20,1); //Midtercirkel
+	GLCD_FillRectangle(118,0,1,128,1); //Midterlinjen
 
 
-	GLCD_FillRectangle(239-18-1,0,2,128,0); //Højre side
+	GLCD_FillRectangle(239-18-1,0,2,128,1); //Højre side
 	GLCD_Rectangle(239-18-30,33,30,60); //Højre straffefelt
 	GLCD_Rectangle(239-18-10,45,10,36); //Højre Målfelt
-	GLCD_FillRectangle(239-37-2,62,2,2,0); //Højre Straffeplet
-	GLCD_FillRectangle(239-17-1,47,1,32,1); //Tyndere højre strej
+	GLCD_FillRectangle(239-37-2,62,2,2,1); //Højre Straffeplet
+	GLCD_FillRectangle(239-17-1,47,1,32,0); //Tyndere højre strej
 	GLCD_Rectangle(239-15-4,47,4,32); //Højre Målkasse
 }
 
@@ -206,33 +206,11 @@ int read()
 	return res;
 }
 
-int status()
-{
-	int vala = (PINB & 4), valb = (PINB & 2);
-	if(!vala && !valb) //Status: 0,0
-	{
-		return 0;
-	}
-	else if(vala && !valb) //Status: 1,0
-	{
-		return 1;
-	}
-	else if(vala && valb) //Status: 1,1
-	{
-		return 2;
-	}
-	else if(!vala && valb) //Status: 0,1
-	{
-		return 3;
-	}
-	return 4; //Burde aldrig komme herned...
-}
-
 void recieve()
 {
-	char damn[5];
+	char damn[5]; // debug ---------------------------------------------------------------------------------------------------
 	recstat = 0;
-	while(recstat < 5)
+	while(recstat < 5) //Skal modtage elle 5 data før den fortsætter, også 255
 	{
 		int temp = read();
 		int tempclk = (PINB & 1);
@@ -241,9 +219,6 @@ void recieve()
 			if(clockstat != tempclk)
 			{
 				clockstat = tempclk;
-				sprintf(damn, "%d", recstat);
-				GLCD_TextGoTo(4,0);
-				GLCD_WriteString(damn);
 				temprec[recstat] = temp;
 				recstat++;
 			}
@@ -253,7 +228,7 @@ void recieve()
 			clockstat = 0;
 		}
 	}
-	//Skal nu til at fordele de midlertidige værdier ind på de rigtige værdier -----------------------
+	//Skal nu til at fordele de midlertidige værdier ind på de rigtige værdier
 	int forskudt=0;
 	for(;forskudt<5;forskudt++)
 	{
@@ -262,40 +237,42 @@ void recieve()
 			break;
 		}
 	}
-	sprintf(damn, "%d", forskudt);
+	// ---------------------------------------------------------------------------------------------------------------------------
+	/*sprintf(damn, "%d", forskudt);
 	GLCD_TextGoTo(0,5);
-	GLCD_WriteString(damn);
+	GLCD_WriteString(damn);*/
 	int i=0;
 	for(;i<5;i++)
 	{
-		sprintf(damn, "%d", temprec[(i+forskudt)%5]);
+		/*sprintf(damn, "%d", temprec[(i+forskudt)%5]);
 		GLCD_TextGoTo(0,7+i);
-		GLCD_WriteString(damn);
+		GLCD_WriteString(damn);*/
 		if(i == 0)
 		{
 			//Gør intet
 		}
 		else if(i == 1)
 		{
-			logicval[0][0] = temprec[(i+forskudt)%5];
+			logicval[1][1] = temprec[(i+forskudt)%5];
 		}
 		else if(i == 2)
 		{
-			logicval[0][1] = temprec[(i+forskudt)%5];
+			logicval[2][1] = temprec[(i+forskudt)%5];
 		}
 		else if(i == 3)
 		{
-			logicval[1][1] = temprec[(i+forskudt)%5];
+			logicval[0][0] = temprec[(i+forskudt)%5];
 		}
 		else if(i == 4)
 		{
-			logicval[2][1] = temprec[(i+forskudt)%5];
+			logicval[0][1] = temprec[(i+forskudt)%5];
 		}
 	}
 }
 
 void draw_ball_test()
 {
+	//Test for at se hvordan bolden virker
 	MOVE_Ball(oldx,oldy,newx,newy);
 	oldx = newx;
 	oldy = newy;
@@ -317,10 +294,6 @@ void draw_ball_test()
 	newx = 120;
 	newy = 50;
 	MOVE_Ball(oldx,oldy,newx,newy);
-	/*for(int o=0;o<1000;o++)
-	{
-		delay();
-	}*/
 	oldx = newx;
 	oldy = newy;
 	newx = 200;
@@ -331,12 +304,6 @@ void draw_ball_test()
 int main(void)
 {
 	initialize();
-	//GLCD_FillRectangle(119, 0, 2, 128, 0);
-	//GLCD_Ball(100,60,3,0);
-	oldx = 10;
-	oldy = 20;
-	newx = 200;
-	newy = 20;
 
 	draw_field();
 	//draw_ball_test();
@@ -348,18 +315,16 @@ int main(void)
 
 	while(1)
 	{
-		int i=0;
 		recieve();
-		GLCD_TextGoTo(0,0);
+		/*GLCD_TextGoTo(0,0);
 		sprintf(str, "%d", logicval[1][1]);
 		GLCD_WriteString(str);
 		GLCD_TextGoTo(0,2);
 		sprintf(str, "%d", logicval[2][1]);
-		GLCD_WriteString(str);
+		GLCD_WriteString(str);*/
 		MOVE_Ball(oldx, oldy, logicval[1][1], logicval[2][1]); // <-------
 		oldx = logicval[1][1];
 		oldy = logicval[2][1];
-		//draw_ball_test();
 	}
 	return 0;
 }

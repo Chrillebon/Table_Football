@@ -18,7 +18,7 @@ void GLCD_Rectangle(unsigned char x, unsigned char y, unsigned char b, unsigned 
 }
 
 
-void GLCD_Circle(unsigned char cx, unsigned char cy ,unsigned char radius,int reverse)
+void GLCD_Circle(unsigned char cx, unsigned char cy ,unsigned char radius,int c)
 {
 int x, y, xchange, ychange, radiusError;
 x = radius;
@@ -28,14 +28,14 @@ ychange = 1;
 radiusError = 0;
 while(x >= y)
   {
-    GLCD_SetPixel(cx+x, cy+y, color-reverse);
-    GLCD_SetPixel(cx-x, cy+y, color-reverse);
-    GLCD_SetPixel(cx-x, cy-y, color-reverse);
-    GLCD_SetPixel(cx+x, cy-y, color-reverse);
-    GLCD_SetPixel(cx+y, cy+x, color-reverse);
-    GLCD_SetPixel(cx-y, cy+x, color-reverse);
-    GLCD_SetPixel(cx-y, cy-x, color-reverse);
-    GLCD_SetPixel(cx+y, cy-x, color-reverse);
+    GLCD_SetPixel(cx+x, cy+y, c);
+    GLCD_SetPixel(cx-x, cy+y, c);
+    GLCD_SetPixel(cx-x, cy-y, c);
+    GLCD_SetPixel(cx+x, cy-y, c);
+    GLCD_SetPixel(cx+y, cy+x, c);
+    GLCD_SetPixel(cx-y, cy+x, c);
+    GLCD_SetPixel(cx-y, cy-x, c);
+    GLCD_SetPixel(cx+y, cy-x, c);
     y++;
     radiusError += ychange;
     ychange += 2;
@@ -49,7 +49,7 @@ while(x >= y)
 }
 
 
-void GLCD_Line(int X1, int Y1,int X2,int Y2,int reverse)
+void GLCD_Line(int X1, int Y1,int X2,int Y2,int c)
 {
 int CurrentX, CurrentY, Xinc, Yinc,
     Dx, Dy, TwoDx, TwoDy,
@@ -81,7 +81,7 @@ if (Dy < 0) // jeśli składowa pionowa jest ujemna
   TwoDy = -TwoDy; // jak równiez podwojonej składowej
   }
 
-GLCD_SetPixel(X1,Y1, color-reverse); // stawiamy pierwszy krok (zapalamy pierwszy piksel)
+GLCD_SetPixel(X1,Y1, c); // stawiamy pierwszy krok (zapalamy pierwszy piksel)
 
 if ((Dx != 0) || (Dy != 0)) // sprawdzamy czy linia składa się z więcej niż jednego punktu ;)
   {
@@ -98,7 +98,7 @@ if ((Dx != 0) || (Dy != 0)) // sprawdzamy czy linia składa się z więcej niż 
         CurrentY += Yinc; // zwiększamy aktualną pozycję w pionie
         TwoDxAccumulatedError -= TwoDx; // i odejmujemy TwoDx
         }
-       GLCD_SetPixel(CurrentX,CurrentY, color-reverse);// stawiamy następny krok (zapalamy piksel)
+       GLCD_SetPixel(CurrentX,CurrentY, c);// stawiamy następny krok (zapalamy piksel)
        }while (CurrentX != X2); // idziemy tak długo, aż osiągniemy punkt docelowy
      }
    else // w przeciwnym razie idziemy "po igrekach"
@@ -113,24 +113,24 @@ if ((Dx != 0) || (Dy != 0)) // sprawdzamy czy linia składa się z więcej niż 
           CurrentX += Xinc;
           TwoDyAccumulatedError -= TwoDy;
           }
-         GLCD_SetPixel(CurrentX,CurrentY, color-reverse);
+         GLCD_SetPixel(CurrentX,CurrentY, c);
          }while (CurrentY != Y2);
     }
   }
 }
 
-void GLCD_Ball(unsigned char cx, unsigned char cy, unsigned char radius, int reverse)
+void GLCD_Test_Ball(unsigned char cx, unsigned char cy, unsigned char radius, int c)
 {
   for(int i=0;i<radius;i++)
   {
-    GLCD_Circle(cx,cy,i,reverse);
+    GLCD_Circle(cx,cy,i,c);
   }
 }
 
-void GLCD_FillRectangle(uint8_t x, uint8_t y, uint8_t dx, uint8_t dy, int reverse)
+void GLCD_FillRectangle(uint8_t x, uint8_t y, uint8_t dx, uint8_t dy, int c)
 {
 uint8_t i, j;
 for(i = x; i < x + dx; i++)
   for(j = y; j < y + dy; j++)
-    GLCD_SetPixel(i, j, 1-reverse);
+    GLCD_SetPixel(i, j, c);
 }

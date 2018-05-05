@@ -1,3 +1,8 @@
+//Dette er IKKE en del af projektet
+//Lige denne fil er der fuld copyright på. Ingen copi af materiale er tilladt!!!
+//Lavet af Christian Mikkelstrup
+//christian.mikkelstrup@gmail.com
+
 #include <iostream>
 #include <queue>
 #include <tuple>

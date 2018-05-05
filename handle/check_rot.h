@@ -1,19 +1,16 @@
-/*int p1_state1;
-int p1_state2;
+///Check_rot.h
+// Dette er alle funktionerne der tjekker rotation for rotary encoders.
 
-int p2_state1;
-int p2_state2;*/
-
-int p1_value = 170;
-int p2_value = 100;
+int p1_value = 118;
+int p2_value = 63;
 
 int h1_value = 127;
 int h2_value = 127;
 
-int val[2][4];
-
 int diff1 = 0;
 int diff2 = 0;
+
+int val[2][4];
 /*
 Val:
 ID: 			0						1						 2							3
@@ -25,7 +22,7 @@ eks: p1_state2 == val[0][1]
 
 int sendstat = 0;
 int overflow = 0;
-int delayval = 0;
+int speedcontrol = 0;
 
 int smart[8] = {
 	1, 2, 4, 8, 16, 32, 64, 128, 256
@@ -50,16 +47,17 @@ void rot1()
 	//pos
 	if (val[0][0] == 1 && val[0][1] == 4) //Takker under bunden
 	{
-		if (p1_value>0){
+		if (p1_value>17){
 			p1_value--;
 		}
 	}
 	else if (val[0][0] == 4 && val[0][1] == 1) //Takker over toppen
 	{
-		if (p1_value<255){
+		if (p1_value<222){
 			p1_value++;
 		}
 	}
+	//Hvis mere hastighed/mere bevægelse: fjern kommentering af dette
   /*else if(val[1][0] > val[1][1]) //Drejer ned:
   {
     if (p1_value>0){
@@ -136,10 +134,11 @@ void rot2()
 		}
 	}
 	else if (val[1][0] == 4 && val[1][1] == 1){
-		if (p2_value<255){
+		if (p2_value<127){
 			p2_value++;
 		}
 	}
+	//Hvis mere hastighed/mere bevægelse: fjern kommentering af dette
 	/*else if(p2_state1 > p2_state2) //Drejer ned:
 	{
 	if (p2_value>0){
