@@ -1,9 +1,3 @@
-/* Name: main.c
- * Author: <Steen Grøntved>
- * Copyright: <insert your copyright message here>
- * License: <insert  your license reference here>
- */
-
 #include <avr/io.h>
 #include <util/delay.h>
 #include "displays.h"

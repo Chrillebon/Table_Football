@@ -1,9 +1,3 @@
-/* Name: main.c for LYD
- * Author: Christian Mikkelstrup
- * Copyright: Use of code has to be accepted through the author
- * License: Use for inspiration, and use common sense
- */
-
 #include <avr/io.h>
 #include <ctype.h>
 #include <stdlib.h>
@@ -13,7 +7,6 @@
 #include "T6963C.c"
 #include "T6963C.h"
 #include <stdbool.h>
-//#include "GLCD_Logic.h"
 
 int r, newx, newy, oldx, oldy, lastrecstat = 0, recstat = 0, clockstat = 0, debug = 0, temprec[5];
 int logicval[3][3] = {100, 100, 99, 60, 99, 0, 180, 99, 0};
@@ -167,6 +160,56 @@ void MOVE_Ball(unsigned char cx, unsigned char cy, unsigned char a, unsigned cha
     	xchange += 2;
   	}
   }
+	oldx = logicval[1][1];
+	oldy = logicval[2][1];
+}
+
+void update_string(char target[], char str[])
+{
+	int i=0;
+	for(;i<30;i++) //resetter
+	{
+		target[i] = '\0';
+	}
+	i=0;
+	while(str[i] != '\0')
+	{
+		target[i] = str[i];
+		i++;
+	}
+}
+
+void draw_intro()
+{
+	char intro[30] = "Digital";
+	GLCD_TextGoTo(11,2);
+	GLCD_WriteString(intro);
+	update_string(intro, "Table");
+	GLCD_TextGoTo(12,4);
+	GLCD_WriteString(intro);
+	update_string(intro,"Foosball");
+	GLCD_TextGoTo(11,6);
+	GLCD_WriteString(intro);
+	update_string(intro, "made by:");//, Einner and Kristoffer");
+	GLCD_TextGoTo(11,10);
+	GLCD_WriteString(intro);
+	update_string(intro, "Christian Mikkelstrup");//, Einner and Kristoffer");
+	GLCD_TextGoTo(5,11);
+	GLCD_WriteString(intro);
+	update_string(intro, "Einner Borch");//, Einner and Kristoffer");
+	GLCD_TextGoTo(9,12);
+	GLCD_WriteString(intro);
+	update_string(intro, "Kristoffer Lyngbirk");//, Einner and Kristoffer");
+	GLCD_TextGoTo(6,13);
+	GLCD_WriteString(intro);
+
+	//delay
+	int i=0;
+	for(;i<3;i++)
+	{
+		GLCD_ClearGraphic();
+	}
+	GLCD_ClearText();
 }
 
 void draw_field() //Tegner banen
@@ -189,6 +232,14 @@ void draw_field() //Tegner banen
 	GLCD_FillRectangle(239-37-2,62,2,2,1); //Højre Straffeplet
 	GLCD_FillRectangle(239-17-1,47,1,32,0); //Tyndere højre strej
 	GLCD_Rectangle(239-15-4,47,4,32); //Højre Målkasse
+
+	//Målcirkler:
+	int i=0;
+	for(;i<10;i++)
+	{
+		GLCD_Circle(8, i*12+9, 5, 1);
+		GLCD_Circle(230, i*12+9, 5, 1);
+	}
 }
 
 int read()
@@ -237,16 +288,9 @@ void recieve()
 			break;
 		}
 	}
-	// ---------------------------------------------------------------------------------------------------------------------------
-	/*sprintf(damn, "%d", forskudt);
-	GLCD_TextGoTo(0,5);
-	GLCD_WriteString(damn);*/
 	int i=0;
 	for(;i<5;i++)
 	{
-		/*sprintf(damn, "%d", temprec[(i+forskudt)%5]);
-		GLCD_TextGoTo(0,7+i);
-		GLCD_WriteString(damn);*/
 		if(i == 0)
 		{
 			//Gør intet
@@ -300,31 +344,77 @@ void draw_ball_test()
 	newy = 20;
 }
 
+void UI()
+{
+	//Så man kan se spillere/hvor hårdt man sparker
+	char str[20];
+	update_string(str, "   ");
+	GLCD_TextGoTo(11, 15);
+	GLCD_WriteString(str);
+	GLCD_TextGoTo(24, 15);
+	GLCD_WriteString(str);
+	update_string(str, "Player 1");
+	GLCD_TextGoTo(4,0);
+	GLCD_WriteString(str);
+	update_string(str, "Player 2");
+	GLCD_TextGoTo(17,0);
+	GLCD_WriteString(str);
+	update_string(str, "Power: ");
+	GLCD_TextGoTo(4,15);
+	GLCD_WriteString(str);
+	sprintf(str, "%d", 127-logicval[0][0]);
+	GLCD_TextGoTo(11, 15);
+	GLCD_WriteString(str);
+	update_string(str, "Power: ");
+	GLCD_TextGoTo(17,15);
+	GLCD_WriteString(str);
+	sprintf(str, "%d", 127-logicval[0][1]);
+	GLCD_TextGoTo(24, 15);
+	GLCD_WriteString(str);
+}
+
 
 int main(void)
 {
 	initialize();
 
+	draw_intro();
 	draw_field();
 	//draw_ball_test();
 
 	oldx = 0;
 	oldy = 0;
 
-	char str[5];
+	char str[10];
 
 	while(1)
 	{
 		recieve();
-		/*GLCD_TextGoTo(0,0);
-		sprintf(str, "%d", logicval[1][1]);
-		GLCD_WriteString(str);
-		GLCD_TextGoTo(0,2);
-		sprintf(str, "%d", logicval[2][1]);
-		GLCD_WriteString(str);*/
-		MOVE_Ball(oldx, oldy, logicval[1][1], logicval[2][1]); // <-------
-		oldx = logicval[1][1];
-		oldy = logicval[2][1];
+		MOVE_Ball(oldx, oldy, logicval[1][1], logicval[2][1]);
+		if((oldx == 17 || oldx == 222) && (oldy < 76 && oldy > 49)) //Så er der mål
+		{
+			update_string(str, "GOAL");
+			GLCD_TextGoTo(6,2);
+			GLCD_WriteString(str);
+			GLCD_TextGoTo(19,2);
+			GLCD_WriteString(str);
+			DDRA |= 64; //Sætter reverse til input (skifter farverne på displayey)
+			int o=0;
+			//Delay
+			for(;o<2;o++)
+			{
+				GLCD_FillRectangle(17,0,1,128,1); //Tegner oven i eksisterende strej
+			}
+			DDRA &= ~64;//tilbage til normal
+			//Delay igen
+			o=0;
+			for(;o<2;o++)
+			{
+				GLCD_FillRectangle(17,0,1,128,1); //Tegner oven i eksisterende strej
+			}
+			GLCD_ClearText();
+		}
+		UI();
 	}
 	return 0;
 }
