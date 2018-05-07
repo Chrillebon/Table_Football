@@ -344,35 +344,6 @@ void draw_ball_test()
 	newy = 20;
 }
 
-void UI()
-{
-	//Så man kan se spillere/hvor hårdt man sparker
-	char str[20];
-	update_string(str, "   ");
-	GLCD_TextGoTo(11, 15);
-	GLCD_WriteString(str);
-	GLCD_TextGoTo(24, 15);
-	GLCD_WriteString(str);
-	update_string(str, "Player 1");
-	GLCD_TextGoTo(4,0);
-	GLCD_WriteString(str);
-	update_string(str, "Player 2");
-	GLCD_TextGoTo(17,0);
-	GLCD_WriteString(str);
-	update_string(str, "Power: ");
-	GLCD_TextGoTo(4,15);
-	GLCD_WriteString(str);
-	sprintf(str, "%d", 127-logicval[0][0]);
-	GLCD_TextGoTo(11, 15);
-	GLCD_WriteString(str);
-	update_string(str, "Power: ");
-	GLCD_TextGoTo(17,15);
-	GLCD_WriteString(str);
-	sprintf(str, "%d", 127-logicval[0][1]);
-	GLCD_TextGoTo(24, 15);
-	GLCD_WriteString(str);
-}
-
 
 int main(void)
 {
@@ -385,7 +356,7 @@ int main(void)
 	oldx = 0;
 	oldy = 0;
 
-	char str[10];
+	char str[20];
 
 	while(1)
 	{
@@ -393,28 +364,49 @@ int main(void)
 		MOVE_Ball(oldx, oldy, logicval[1][1], logicval[2][1]);
 		if((oldx == 17 || oldx == 222) && (oldy < 76 && oldy > 49)) //Så er der mål
 		{
+			GLCD_ClearText();
 			update_string(str, "GOAL");
 			GLCD_TextGoTo(6,2);
 			GLCD_WriteString(str);
 			GLCD_TextGoTo(19,2);
 			GLCD_WriteString(str);
 			DDRA |= 64; //Sætter reverse til input (skifter farverne på displayey)
-			int o=0;
 			//Delay
-			for(;o<2;o++)
-			{
-				GLCD_FillRectangle(17,0,1,128,1); //Tegner oven i eksisterende strej
-			}
+			GLCD_FillRectangle(17,0,1,128,1); //Tegner oven i eksisterende strej
 			DDRA &= ~64;//tilbage til normal
 			//Delay igen
-			o=0;
-			for(;o<2;o++)
-			{
-				GLCD_FillRectangle(17,0,1,128,1); //Tegner oven i eksisterende strej
-			}
+			GLCD_FillRectangle(17,0,1,128,1); //Tegner oven i eksisterende strej
+
 			GLCD_ClearText();
 		}
-		UI();
+		else
+		{
+			//Så man kan se spillere/hvor hårdt man sparker
+			//Dette er UI
+			update_string(str, "   ");
+			GLCD_TextGoTo(11, 15);
+			GLCD_WriteString(str);
+			GLCD_TextGoTo(24, 15);
+			GLCD_WriteString(str);
+			update_string(str, "Player 1");
+			GLCD_TextGoTo(4,0);
+			GLCD_WriteString(str);
+			update_string(str, "Player 2");
+			GLCD_TextGoTo(17,0);
+			GLCD_WriteString(str);
+			update_string(str, "Power: ");
+			GLCD_TextGoTo(4,15);
+			GLCD_WriteString(str);
+			sprintf(str, "%d", 127-logicval[0][0]);
+			GLCD_TextGoTo(11, 15);
+			GLCD_WriteString(str);
+			update_string(str, "Power: ");
+			GLCD_TextGoTo(17,15);
+			GLCD_WriteString(str);
+			sprintf(str, "%d", 127-logicval[0][1]);
+			GLCD_TextGoTo(24, 15);
+			GLCD_WriteString(str);
+		}
 	}
 	return 0;
 }
