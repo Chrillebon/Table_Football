@@ -61,7 +61,7 @@ void send()
   }
   else if(sendstat == 2) //speed1
   {
-    PORTD = diff1;
+    PORTD = diff2;
   }
   else if(sendstat == 3) //pos2
   {
@@ -69,7 +69,7 @@ void send()
   }
   else if(sendstat == 4) //speed2
   {
-    PORTD = diff2;
+    PORTD = diff1;
   }
   sendstat++;
   if(sendstat >= 5) //reset
@@ -96,7 +96,7 @@ int main(void)
       oflow();
       speedcontrol++;
     }
-    if(speedcontrol >= 18) //Så man kan nå at dreje så meget som muligt, uden den kommer uden for grænserne
+    if(speedcontrol >= 30) //Så man kan nå at dreje så meget som muligt, uden den kommer uden for grænserne
     {
       //127 så den kan dreje begge veje
       diff1 = abs(h1_value);

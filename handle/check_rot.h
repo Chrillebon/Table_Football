@@ -48,28 +48,26 @@ void rot1()
 	if (val[0][0] == 1 && val[0][1] == 4) //Takker under bunden
 	{
 		if (p1_value>17){
-			p1_value--;
+			p1_value-=2;
 		}
 	}
 	else if (val[0][0] == 4 && val[0][1] == 1) //Takker over toppen
 	{
 		if (p1_value<222){
-			p1_value++;
+			p1_value+=2;
 		}
-	}
-	//Hvis mere hastighed/mere bevægelse: fjern kommentering af dette
-  /*else if(val[1][0] > val[1][1]) //Drejer ned:
+	}else if(val[1][0] > val[1][1]) //Drejer ned:
   {
-    if (p1_value>0){
-			p1_value--;
+    if (p1_value>17){
+			p1_value-=2;
 		}
   }
   else if (val[1][0] < val[1][1]) //Drejer op:
   {
-    if (p1_value<255){
-			p1_value++;
+    if (p1_value<222){
+			p1_value+=2;
 		}
-  }*/
+  }
 
   val[0][0] = val[0][1];
 }
@@ -130,27 +128,26 @@ void rot2()
 	//Pos
 	if (val[1][0] == 1 && val[1][1] == 4){
 		if (p2_value>0){
-			p2_value --;
+			p2_value-=2;
 		}
 	}
 	else if (val[1][0] == 4 && val[1][1] == 1){
 		if (p2_value<127){
-			p2_value++;
+			p2_value+=2;
 		}
 	}
-	//Hvis mere hastighed/mere bevægelse: fjern kommentering af dette
-	/*else if(p2_state1 > p2_state2) //Drejer ned:
+	else if(val[1][0] > val[1][1]) //Drejer ned:
 	{
-	if (p2_value>0){
-	p2_value--;
+		if (p2_value>0){
+			p2_value-=2;
+		}
 	}
-	}
-	else if (p2_state1 < p2_state2) //Drejer op:
+	else if (val[1][0] < val[1][1]) //Drejer op:
 	{
-	if (p2_value<255){
-	p2_value++;
+		if (p2_value<127){
+			p2_value+=2;
+		}
 	}
-	}*/
 	val[1][0] = val[1][1];
 }
 
