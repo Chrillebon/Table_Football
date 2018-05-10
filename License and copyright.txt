@@ -11,3 +11,8 @@ No Coyright - Use or change of any material allowed
 
 Design and Production project "Digital Foosball"
 Due date 11/5
+
+
+
+T6963C.c, T6963C.h, Graphic.c og Graphic.h er downloadet og brug fra denne side:
+http://en.radzio.dxp.pl/t6963/
